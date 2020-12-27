@@ -122,7 +122,7 @@ namespace MPGApp
 
             var sData = Db.GetCollection<PlayersWorthStats>(String.Concat(Championship.champName, "PlayersCalcStats"));
             sData.DeleteAll();
-            sData.InsertBulk(PlayersToCheck);
+            sData.InsertBulk(AllPlayers);
         }
 
         public void WriteConsoleOutput()
