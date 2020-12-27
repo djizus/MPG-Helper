@@ -127,6 +127,7 @@ namespace MPGApp
 
         public void WriteConsoleOutput()
         {
+            Console.WriteLine("");
             Console.WriteLine("Best 5 players to check");
             foreach (var p in PlayersToCheck.OrderByDescending(x => x.Momentum).Take(5))
             {

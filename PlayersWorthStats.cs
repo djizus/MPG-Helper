@@ -55,7 +55,7 @@ namespace MPGApp
                 //ret += 10 * PStarter;
                 ret += 10 * (double)TotalPlayed / RealNbMatch;
                 //ret += 5 * MinM / 90d * 10d;
-                ret += 5 * Rate;
+                ret += 10 * Rate;
 
                 //ret -= RedC * 10;
                 //ret -= MistakeM * 5;
