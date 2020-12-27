@@ -9,7 +9,7 @@ namespace MPGApp
 {
     public class LeagueAnalyser
     {
-        private const string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1wZ191c2VyXzU0MzQ2MSIsImNoZWNrIjoiNmY5NDdiYWY3MmY2ZDE3YyIsImlhdCI6MTYwNDc1MjIyOH0.JZIMpUpwo37eQWY2NCm70vrCUndPb9hcIoU8sryqGh4";
+        private const string jnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1wZ191c2VyXzU0MzQ2MSIsImNoZWNrIjoiNmY5NDdiYWY3MmY2ZDE3YyIsImlhdCI6MTYwNDc1MjIyOH0.JZIMpUpwo37eQWY2NCm70vrCUndPb9hcIoU8sryqGh4";
         private LiteDatabase Db { get; set; }
         private HttpClient Client { get; set; }
         public ChampData Championship { get; set; }
@@ -27,7 +27,7 @@ namespace MPGApp
         }
         public void GetLeaguePlayerData()
         {
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(token);
+            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(jnToken);
 
             string vUrl = String.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/transfer/buy");
             var response = Client.GetStringAsync(vUrl).Result;
