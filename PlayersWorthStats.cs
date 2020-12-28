@@ -6,6 +6,56 @@ using System.Threading.Tasks;
 
 namespace MPGApp
 {
+    public class PlayersTimeStats
+    {
+        public string id { get; set; }
+        public string Name { get; set; }
+
+        public PlayersWorthStats CurrentSeasonStats { get; set; }
+        public PlayersWorthStats PastSeason1Stats { get; set; }
+        public PlayersWorthStats PastSeason2Stats { get; set; }
+
+        public double CurrentRating { get { return CurrentSeasonStats.OurRating; } }
+        public double PastRating1 { get { return (null != PastSeason1Stats) ? PastSeason1Stats.OurRating : 0; } }
+        public double PastRating2 { get { return (null != PastSeason2Stats) ? PastSeason2Stats.OurRating : 0; } }
+
+        public double OurRating
+        {
+            get
+            {
+                double wCurrent = 10;
+                double wPast1 = 4;
+                double wPast2 = 2;
+
+                double weight = wCurrent;
+
+                if (null != PastSeason1Stats)
+                {
+                    if (4 == PastSeason1Stats.championship && CurrentSeasonStats.championship != 4)
+                        wPast1 = 1;
+
+                    weight += wPast1;
+                }
+
+                if (null != PastSeason2Stats )
+                {
+                    if (4 == PastSeason2Stats.championship && CurrentSeasonStats.championship != 4)
+                        wPast2 = 1;
+
+                    weight += wPast2;
+                }
+
+                double ret = CurrentSeasonStats.OurRating * wCurrent / weight + PastRating1 * wPast1 / weight + PastRating2 * wPast2 / weight;
+                return ret;
+            }
+        }
+
+        public double Consistency
+        {
+            get{return CurrentSeasonStats.OurRating - OurRating;}
+        }
+    }
+
     public class PlayersWorthStats
     {
         public string id { get; set; }
@@ -14,11 +64,13 @@ namespace MPGApp
         public int Position { get; set; }
         public int RealNbMatch { get; set; }
         public int LastPlayedM { get; set; }
-        public double PStarter { get; set; }
         public double Rate { get; set; }
         public int Goals { get; set; }
         public int RedC { get; set; }
         public int TotalPlayed { get; set; }
+        public int championship { get; set; }
+
+        public double PStarter { get; set; }
         public double MinM { get; set; }
         public double MistakeM { get; set; }
         public double ShotM { get; set; }
@@ -46,49 +98,20 @@ namespace MPGApp
         public int CAssists { get; set; }
         public int CChancesCreated { get; set; }
 
-        public double CalcWorth
+        public double OurRating
         {
             get
             {
                 double ret = 0;
-                ret += 2 * (10 - 2 * (LastPlayedM));
-                //ret += 10 * PStarter;
-                ret += 10 * (double)TotalPlayed / RealNbMatch;
-                //ret += 5 * MinM / 90d * 10d;
-                ret += 10 * Rate;
+                if (RealNbMatch > 0)
+                {
+                    ret += 2 * (10 - 2 * (LastPlayedM));
+                    ret += 10 * (double)TotalPlayed / RealNbMatch;
+                    ret += 10 * Rate;
 
-                //ret -= RedC * 10;
-                //ret -= MistakeM * 5;
-
-                ret += Goals;
-                //ret += ChancesCreated;
-
-                //if (Position > 1)
-                //{
-                //    ret += ShotM;
-                //    ret += CrossSucM;
-                //    ret += AssistsNb;
-
-                //    if (PenaltyNb > 0)
-                //    {
-                //        ret += PenaltyNb;
-                //        ret += 5 * PPenaltyConv / 10d;
-                //    }
-
-                //    ret += 2 * PShotTargetM / 10d;
-                //    ret += 2 * PCrossSucM / 10d;
-                //    ret += 5 * PGoalChances / 10d;
-
-                //    ret -= ChancesMiss;
-                //}
-                //else
-                //{
-                //    ret += KCleanSheet * 2;
-                //    ret += KPSaveShot / 10d;
-                //    //ret += KSaves;
-                //    ret += KPenaltySave * 3;
-                //    //ret += KDeflect;
-                //}
+                    //ret -= RedC * 10;
+                    ret += Goals;
+                }
 
                 return ret;
             }
@@ -96,7 +119,7 @@ namespace MPGApp
 
         public double Momentum
         {
-            get { return (CalcWorth + Math.Min(5, ConsecutivePlay)) * CRate / Rate; }
+            get { return (OurRating + Math.Min(5, ConsecutivePlay)) * CRate / Rate; }
         }
 
         public PlayersWorthStats(PlayersWorthStats inp)
@@ -170,6 +193,21 @@ namespace MPGApp
             KSaves = kSaves;
             KDeflect = kDeflect;
             KPenaltySave = kPenaltySave;
+        }
+
+        public PlayersWorthStats(string id, string name, int quotation, int position, int nbMatch, int lastPlayedM, double rate,
+            int goals, int redC, int totalPlayed)
+        {
+            this.id = id;
+            Name = name;
+            Quotation = quotation;
+            Position = position;
+            RealNbMatch = nbMatch;
+            LastPlayedM = lastPlayedM;
+            Rate = rate;
+            Goals = goals;
+            RedC = redC;
+            TotalPlayed = totalPlayed;
         }
     }
 

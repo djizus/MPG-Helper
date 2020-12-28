@@ -12,46 +12,40 @@ namespace MPGApp
         static void Main(string[] args)
         {
             var championship = new ChampData();
-
-            Db = new LiteDatabase(String.Concat("MPGData.db"));
-
-            DataRetriever dR = new DataRetriever(Db, client){Championship = championship};
-
-            dR.GetData();
-
-            CommonDataAnalyser cDA = new CommonDataAnalyser(Db){ Championship = championship};
-
-            cDA.AnalyzeData();
-            cDA.WriteConsoleOutput();
+            DoChamp(championship, false);
 
             var lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9T8");
             lAnalyser.GetLeaguePlayerData();
 
+            Db.Dispose();
+
             championship.champName = "EPL";
             championship.champNb = 2;
-
-            dR.GetData();
-
-            cDA.AnalyzeData();
-            cDA.WriteConsoleOutput();
+            DoChamp(championship);
 
             championship.champName = "Ligue2";
             championship.champNb = 4;
-
-            dR.GetData();
-
-            cDA.AnalyzeData();
-            cDA.WriteConsoleOutput();
+            DoChamp(championship);
 
             championship.champName = "Calcio";
             championship.champNb = 5;
+            DoChamp(championship);
+        }
+
+        static void DoChamp(ChampData champ, bool disposeDb = true)
+        {
+            Db = new LiteDatabase(String.Concat("MPG", champ.champName, "Data.db"));
+
+            DataRetriever dR = new DataRetriever(Db, client) { Championship = champ };
 
             dR.GetData();
+
+            CommonDataAnalyser cDA = new CommonDataAnalyser(Db) { Championship = champ };
 
             cDA.AnalyzeData();
             cDA.WriteConsoleOutput();
 
-            Db.Dispose();
+            if(disposeDb) Db.Dispose();
         }
     }
 }

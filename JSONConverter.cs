@@ -4,6 +4,49 @@ using System.Text.Json.Serialization;
 
 namespace MPGApp
 {
+
+    public class TeamConverter : JsonConverter<Teams>
+    {
+        public override bool CanConvert(Type typeToConvert)
+        {
+            if (typeToConvert == typeof(Teams))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public override Teams Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var t = new Teams();
+            if (reader.TokenType != JsonTokenType.Null)
+            {
+                if (JsonTokenType.StartArray != reader.TokenType)
+                {
+                    switch (reader.TokenType)
+                    {
+                        case JsonTokenType.String:
+                            var sValue = reader.GetString();
+                            //_ = double.TryParse(sValue, out ret);
+                            break;
+                        case JsonTokenType.Number:
+                            //_ = reader.TryGetDouble(out ret);
+                            break;
+                        default:
+                            break;
+
+                    }
+                }
+            }
+            return t;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Teams value, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class StringToDoubleConverter : JsonConverter<double>
     {
         public override bool CanConvert(Type typeToConvert)
