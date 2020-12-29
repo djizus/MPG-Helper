@@ -42,10 +42,10 @@ namespace MPGApp
             foreach (var p in playersIn)
             {
                 var pTimeStats = new PlayersTimeStats
-                {
-                    id = p.id,
-                    Name = p.firstname != null ? String.Concat(p.firstname, " ", p.lastname) : p.lastname
-                };
+                (
+                    p.id,
+                    p.firstname != null ? String.Concat(p.firstname, " ", p.lastname) : p.lastname
+                );
 
                 pTimeStats.CurrentSeasonStats = GetSeasonPlayerStats(p, Championship.currentSeason);
                 pTimeStats.PastSeason1Stats = GetPastPlayerStats(p.id, Championship.currentSeason - 1);
@@ -96,7 +96,7 @@ namespace MPGApp
                 var allCal = calData.FindAll();
 
                 int realNbMatch = 0;
-                if(p.championships.First().Value.club == p.club)
+                if (p.championships.First().Value.club == p.club)
                 {
                     var avSince = p.championships.First().Value.joinDate;
                     realNbMatch = allCal.Where(x => (x.matches.First().date > avSince) && (x.matches.First().date < DateTime.Now)).Count();

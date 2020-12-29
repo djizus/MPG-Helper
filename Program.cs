@@ -14,7 +14,7 @@ namespace MPGApp
             var championship = new ChampData();
             DoChamp(championship, false);
 
-            var lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9T8");
+            var lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9T8") { Championship = championship };
             lAnalyser.GetLeaguePlayerData();
 
             Db.Dispose();
@@ -45,7 +45,7 @@ namespace MPGApp
             cDA.AnalyzeData();
             cDA.WriteConsoleOutput();
 
-            if(disposeDb) Db.Dispose();
+            if (disposeDb) Db.Dispose();
         }
     }
 }
