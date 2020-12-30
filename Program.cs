@@ -17,24 +17,27 @@ namespace MPGApp
             var lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9T8") { Championship = championship };
             lAnalyser.GetLeaguePlayerData();
 
+            lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9UC") { Championship = championship };
+            lAnalyser.GetLeaguePlayerData();
+
             Db.Dispose();
 
-            championship.champName = "EPL";
-            championship.champNb = 2;
-            DoChamp(championship);
+            //championship.champName = "EPL";
+            //championship.champNb = 2;
+            //DoChamp(championship);
 
-            championship.champName = "Ligue2";
-            championship.champNb = 4;
-            DoChamp(championship);
+            //championship.champName = "Ligue2";
+            //championship.champNb = 4;
+            //DoChamp(championship);
 
-            championship.champName = "Calcio";
-            championship.champNb = 5;
-            DoChamp(championship);
+            //championship.champName = "Calcio";
+            //championship.champNb = 5;
+            //DoChamp(championship);
         }
 
         static void DoChamp(ChampData champ, bool disposeDb = true)
         {
-            Db = new LiteDatabase(String.Concat("MPG", champ.champName, "Data.db"));
+            Db = new LiteDatabase(string.Concat("MPG", champ.champName, "Data.db"));
 
             DataRetriever dR = new DataRetriever(Db, client) { Championship = champ };
 

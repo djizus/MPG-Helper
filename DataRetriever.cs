@@ -9,7 +9,7 @@ namespace MPGApp
     public class ChampData
     {
         public int currentSeason;
-        public String champName;
+        public string champName;
         public int champNb;
 
         public ChampData()
@@ -19,9 +19,9 @@ namespace MPGApp
             champNb = 1;
         }
 
-        public override String ToString()
+        public override string ToString()
         {
-            return String.Concat(champName, currentSeason);
+            return string.Concat(champName, currentSeason);
         }
     }
 
@@ -43,12 +43,12 @@ namespace MPGApp
         }
         public void GetData()
         {
-            var cData = Db.GetCollection<MpgChampionshipPlayers>(String.Concat(Championship.champName, "Players"));
+            var cData = Db.GetCollection<MpgChampionshipPlayers>(string.Concat(Championship.champName, "Players"));
 
             if (0 == cData.Count())
             {
                 Console.WriteLine("Get " + Championship.champName + " Players ... Start");
-                var vUrl = String.Concat("https://api.monpetitgazon.com/stats/championship/", Championship.champNb, "/", Championship.currentSeason);
+                var vUrl = string.Concat("https://api.monpetitgazon.com/stats/championship/", Championship.champNb, "/", Championship.currentSeason);
                 var response = Client.GetStringAsync(vUrl).Result;
                 var jsonData = System.Text.Json.JsonSerializer.Deserialize<List<MpgChampionshipPlayers>>(response);
                 cData.InsertBulk(jsonData);
@@ -57,9 +57,9 @@ namespace MPGApp
 
             //cData.EnsureIndex(x => x.id);
 
-            var dData = Db.GetCollection<MpgDetailedPlayersData>(String.Concat(Championship.ToString(), "DetailedPlayersData"));
-            var dData1 = Db.GetCollection<MpgDetailedPlayersData>(String.Concat(Championship.champName, Championship.currentSeason - 1, "DetailedPlayersData"));
-            var dData2 = Db.GetCollection<MpgDetailedPlayersData>(String.Concat(Championship.champName, Championship.currentSeason - 2, "DetailedPlayersData"));
+            var dData = Db.GetCollection<MpgDetailedPlayersData>(string.Concat(Championship.ToString(), "DetailedPlayersData"));
+            var dData1 = Db.GetCollection<MpgDetailedPlayersData>(string.Concat(Championship.champName, Championship.currentSeason - 1, "DetailedPlayersData"));
+            var dData2 = Db.GetCollection<MpgDetailedPlayersData>(string.Concat(Championship.champName, Championship.currentSeason - 2, "DetailedPlayersData"));
 
             if (0 == dData.Count())
             {
@@ -77,7 +77,7 @@ namespace MPGApp
                     if (0 != p.stats.avgRate)
                     {
                         var Id = p.id.Split('_');
-                        var vUrl = String.Concat("https://api.monpetitgazon.com/stats/player/", Id.Last(), "?season=", Championship.currentSeason);
+                        var vUrl = string.Concat("https://api.monpetitgazon.com/stats/player/", Id.Last(), "?season=", Championship.currentSeason);
                         var response = Client.GetStringAsync(vUrl).Result;
                         var jsonData = System.Text.Json.JsonSerializer.Deserialize<MpgDetailedPlayersData>(response);
                         dPlayersData.Add(jsonData);
@@ -106,7 +106,7 @@ namespace MPGApp
         {
             try
             {
-                var vUrl = String.Concat("https://api.monpetitgazon.com/stats/player/", id, "?season=", season);
+                var vUrl = string.Concat("https://api.monpetitgazon.com/stats/player/", id, "?season=", season);
                 var response = Client.GetStringAsync(vUrl).Result;
                 var jsonData = System.Text.Json.JsonSerializer.Deserialize<MpgDetailedPlayersData>(response);
                 list.Add(jsonData);
@@ -116,18 +116,18 @@ namespace MPGApp
 
         private void GetCurrentCalendar()
         {
-            var calendarData = Db.GetCollection<MpgCalendar>(String.Concat(Championship.ToString(), "Calendar"));
+            var calendarData = Db.GetCollection<MpgCalendar>(string.Concat(Championship.ToString(), "Calendar"));
 
             if (0 == calendarData.Count())
             {
                 Console.WriteLine("Get " + Championship.champName + " Calendar ... Start");
-                var vUrl = String.Concat("https://api.monpetitgazon.com/championship/", Championship.champNb, "/calendar");
+                var vUrl = string.Concat("https://api.monpetitgazon.com/championship/", Championship.champNb, "/calendar");
 
                 Console.WriteLine("38 Match Day to get");
                 for (var i = 38; i > 0; i--)
                 {
                     Console.Write("\r{0}%   ", 100d - (i / 38d * 100d));
-                    var dUrl = String.Concat(vUrl, "/", i);
+                    var dUrl = string.Concat(vUrl, "/", i);
                     var response = Client.GetStringAsync(dUrl).Result;
                     var jsonData = System.Text.Json.JsonSerializer.Deserialize<MpgCalendar>(response);
                     calendarData.Insert(jsonData);
@@ -139,12 +139,12 @@ namespace MPGApp
 
         private void GetPastCalendars(int season)
         {
-            var pastSeasonId = String.Concat(Championship.champName, season);
-            var cData = Db.GetCollection<MpgCalendar>(String.Concat(pastSeasonId, "Calendar"));
+            var pastSeasonId = string.Concat(Championship.champName, season);
+            var cData = Db.GetCollection<MpgCalendar>(string.Concat(pastSeasonId, "Calendar"));
 
             if (0 == cData.Count())
             {
-                var dData = Db.GetCollection<MpgDetailedPlayersData>(String.Concat(pastSeasonId, "DetailedPlayersData"));
+                var dData = Db.GetCollection<MpgDetailedPlayersData>(string.Concat(pastSeasonId, "DetailedPlayersData"));
                 var allPlayers = dData.FindAll();
                 var tst = allPlayers.Where(x => x.stats.matches.Length == x.nbMatch).FirstOrDefault();
 

@@ -70,7 +70,7 @@ namespace MPGApp
             PastSeason2Stats = inp.PastSeason2Stats;
         }
 
-        public PlayersTimeStats(String idIn, String nameIn)
+        public PlayersTimeStats(string idIn, string nameIn)
         {
             id = idIn;
             Name = nameIn;

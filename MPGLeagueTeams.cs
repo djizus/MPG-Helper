@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace MPGApp
 {
 
-    public class MPGLeagueStatus
+    public class MpgLeagueStatus
     {
         public string leagueName { get; set; }
         public int leagueStatus { get; set; }
@@ -18,7 +18,7 @@ namespace MPGApp
         public int teamStatus { get; set; }
     }
 
-    public class MPGLeagueTeams
+    public class MpgLeagueTeams
     {
         public class Teams
         {
@@ -34,6 +34,11 @@ namespace MPGApp
                     public int ultraPosition { get; set; }
                     public string teamid { get; set; }
                     public int price_paid { get; set; }
+
+                    public override string ToString()
+                    {
+                        return (null != firstname)? firstname + " " + lastname : lastname;
+                    }
                 }
                 public string id { get; set; }
                 public string name { get; set; }

@@ -20,16 +20,16 @@ namespace MPGApp
         }
         public void AnalyzeData()
         {
-            var dData = Db.GetCollection<MpgDetailedPlayersData>(String.Concat(Championship.ToString(), "DetailedPlayersData"));
+            var dData = Db.GetCollection<MpgDetailedPlayersData>(string.Concat(Championship.ToString(), "DetailedPlayersData"));
             var allPlayers = dData.FindAll();
 
             AnalysePlayerStats(allPlayers);
 
-            var pData = Db.GetCollection<PlayersTimeStats>(String.Concat(Championship.champName, "PlayersToCheck"));
+            var pData = Db.GetCollection<PlayersTimeStats>(string.Concat(Championship.champName, "PlayersToCheck"));
             pData.DeleteAll();
             pData.InsertBulk(PlayersToCheck);
 
-            var sData = Db.GetCollection<PlayersTimeStats>(String.Concat(Championship.champName, "PlayersCalcStats"));
+            var sData = Db.GetCollection<PlayersTimeStats>(string.Concat(Championship.champName, "PlayersCalcStats"));
             sData.DeleteAll();
             sData.InsertBulk(PlayersSeasonsStats);
         }
@@ -44,7 +44,7 @@ namespace MPGApp
                 var pTimeStats = new PlayersTimeStats
                 (
                     p.id,
-                    p.firstname != null ? String.Concat(p.firstname, " ", p.lastname) : p.lastname
+                    p.firstname != null ? string.Concat(p.firstname, " ", p.lastname) : p.lastname
                 );
 
                 pTimeStats.CurrentSeasonStats = GetSeasonPlayerStats(p, Championship.currentSeason);
@@ -56,13 +56,13 @@ namespace MPGApp
                 allPlayersStats.Add(pTimeStats);
             }
 
-            PlayersSeasonsStats = new List<PlayersTimeStats>(allPlayersStats.OrderByDescending(x => x.CurrentSeasonStats.OurRating));
-            PlayersToCheck = new List<PlayersTimeStats>(playersToCheck.OrderByDescending(x => x.CurrentSeasonStats.OurRating));
+            PlayersSeasonsStats = new List<PlayersTimeStats>(allPlayersStats.OrderByDescending(x => x.CurrentRating));
+            PlayersToCheck = new List<PlayersTimeStats>(playersToCheck.OrderByDescending(x => x.CurrentRating));
         }
 
         private PlayersWorthStats GetSeasonPlayerStats(MpgDetailedPlayersData p, int season)
         {
-            var calData = Db.GetCollection<MpgCalendar>(String.Concat(Championship.champName, season, "Calendar"));
+            var calData = Db.GetCollection<MpgCalendar>(string.Concat(Championship.champName, season, "Calendar"));
             var allCal = calData.FindAll();
 
             var avSince = p.championships[Championship.champNb.ToString()].joinDate;
@@ -70,8 +70,8 @@ namespace MPGApp
 
             var seasonPlayerStats = new PlayersWorthStats
             (
-                String.Concat(p.id, "_", season),
-                p.firstname != null ? String.Concat(p.firstname, " ", p.lastname) : p.lastname,
+                string.Concat(p.id, "_", season),
+                p.firstname != null ? string.Concat(p.firstname, " ", p.lastname) : p.lastname,
                 p.quotation,
                 p.position,
                 realNbMatch,
@@ -87,12 +87,12 @@ namespace MPGApp
 
         private PlayersWorthStats GetPastPlayerStats(string pId, int season)
         {
-            var pData = Db.GetCollection<MpgDetailedPlayersData>(String.Concat(Championship.champName, season, "DetailedPlayersData"));
+            var pData = Db.GetCollection<MpgDetailedPlayersData>(string.Concat(Championship.champName, season, "DetailedPlayersData"));
             var p = pData.FindById(pId);
 
             if (null != p)
             {
-                var calData = Db.GetCollection<MpgCalendar>(String.Concat(Championship.champName, season, "Calendar"));
+                var calData = Db.GetCollection<MpgCalendar>(string.Concat(Championship.champName, season, "Calendar"));
                 var allCal = calData.FindAll();
 
                 int realNbMatch = 0;
@@ -106,8 +106,8 @@ namespace MPGApp
 
                 var seasonPlayerStats = new PlayersWorthStats
                 (
-                    String.Concat(p.id, "_", season),
-                    p.firstname != null ? String.Concat(p.firstname, " ", p.lastname) : p.lastname,
+                    string.Concat(p.id, "_", season),
+                    p.firstname != null ? string.Concat(p.firstname, " ", p.lastname) : p.lastname,
                     4 == p.stats.currentChampionship ? p.quotation / 2 : p.quotation,
                     p.position,
                     realNbMatch,
@@ -175,7 +175,7 @@ namespace MPGApp
         {
             Console.WriteLine("");
 
-            var header = String.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
+            var header = string.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
                   "5 players to check", "Quote", "Momentum", "Our Rating", "Season Imp");
             Console.WriteLine(header);
             foreach (var p in PlayersToCheck.OrderByDescending(x => x.CurrentSeasonStats.Momentum).Take(5))
@@ -191,7 +191,7 @@ namespace MPGApp
             }
             Console.WriteLine("");
 
-            header = String.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
+            header = string.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
                               "Best 5 Keepers", "Quote", "Momentum", "Our Rating", "Season Imp");
             Console.WriteLine(header);
             foreach (var p in PlayersSeasonsStats.Where(x => (x.CurrentSeasonStats.Position == 1)).Take(5))
@@ -200,7 +200,7 @@ namespace MPGApp
             }
             Console.WriteLine("");
 
-            header = String.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
+            header = string.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
                               "Best 10 Defenders", "Quote", "Momentum", "Our Rating", "Season Imp");
             Console.WriteLine(header);
             foreach (var p in PlayersSeasonsStats.Where(x => (x.CurrentSeasonStats.Position == 2)).Take(10))
@@ -209,7 +209,7 @@ namespace MPGApp
             }
             Console.WriteLine("");
 
-            header = String.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
+            header = string.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
                               "Best 10 Midfielders", "Quote", "Momentum", "Our Rating", "Season Imp");
             Console.WriteLine(header);
             foreach (var p in PlayersSeasonsStats.Where(x => (x.CurrentSeasonStats.Position == 3)).Take(10))
@@ -218,7 +218,7 @@ namespace MPGApp
             }
             Console.WriteLine("");
 
-            header = String.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
+            header = string.Format("{0,-25}{1,6}{2,10}{3,12}{4,12}\n",
                               "Best 10 Attackers", "Quote", "Momentum", "Our Rating", "Season Imp");
             Console.WriteLine(header);
             foreach (var p in PlayersSeasonsStats.Where(x => (x.CurrentSeasonStats.Position == 4)).Take(10))
@@ -228,7 +228,7 @@ namespace MPGApp
             Console.WriteLine("");
         }
 
-        private String GetConsoleDisplay(PlayersTimeStats p)
+        private string GetConsoleDisplay(PlayersTimeStats p)
         {
             string seasonImp = "=";
             if (p.Consistency > 10)
@@ -244,9 +244,9 @@ namespace MPGApp
             else if (p.Consistency < -1 && p.Consistency < 0)
                 seasonImp = "-";
 
-            var output = String.Format("{0,-25}{1,6}{2,10:F2}{3,12:F2}{4,12}",
+            var output = string.Format("{0,-25}{1,6}{2,10:F2}{3,12:F2}{4,12}",
                           p.Name, p.CurrentSeasonStats.Quotation, p.CurrentSeasonStats.Momentum,
-                          p.CurrentSeasonStats.OurRating, seasonImp);
+                          p.CurrentRating, seasonImp);
 
             return output;
         }

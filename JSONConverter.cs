@@ -6,11 +6,11 @@ using System.Text.Json.Serialization;
 namespace MPGApp
 {
 
-    public class TeamConverter : JsonConverter<MPGLeagueTeams.Teams>
+    public class TeamConverter : JsonConverter<MpgLeagueTeams.Teams>
     {
         public override bool CanConvert(Type typeToConvert)
         {
-            if (typeToConvert == typeof(MPGLeagueTeams.Teams))
+            if (typeToConvert == typeof(MpgLeagueTeams.Teams))
             {
                 return true;
             }
@@ -18,18 +18,20 @@ namespace MPGApp
             return false;
         }
 
-        public override MPGLeagueTeams.Teams Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override MpgLeagueTeams.Teams Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var teams = new MPGLeagueTeams.Teams();
-            teams.mpg_teams = new List<MPGLeagueTeams.Teams.Mpg_Team>();
+            var teams = new MpgLeagueTeams.Teams
+            {
+                mpg_teams = new List<MpgLeagueTeams.Teams.Mpg_Team>()
+            };
             if (reader.TokenType != JsonTokenType.Null)
             {
                 if (reader.TokenType == JsonTokenType.StartObject)
                 {
                     var startDepth = reader.CurrentDepth;
 
-                    MPGLeagueTeams.Teams.Mpg_Team t = null;
-                    String currentProperty = "";
+                    MpgLeagueTeams.Teams.Mpg_Team t = null;
+                    string currentProperty = "";
                     bool newTeam = false;
 
                     while (reader.Read())
@@ -57,11 +59,11 @@ namespace MPGApp
                         }
                         else if (reader.TokenType == JsonTokenType.StartArray)
                         {
-                            t.players = System.Text.Json.JsonSerializer.Deserialize<List<MPGLeagueTeams.Teams.Mpg_Team.Player>>(ref reader);
+                            t.players = System.Text.Json.JsonSerializer.Deserialize<List<MpgLeagueTeams.Teams.Mpg_Team.Player>>(ref reader);
                         }
                         else if (reader.TokenType == JsonTokenType.StartObject && newTeam)
                         {
-                            t = new MPGLeagueTeams.Teams.Mpg_Team();
+                            t = new MpgLeagueTeams.Teams.Mpg_Team();
                         }
                         else if (reader.TokenType == JsonTokenType.EndObject && newTeam)
                         {
@@ -76,7 +78,7 @@ namespace MPGApp
             return teams;
         }
 
-        public override void Write(Utf8JsonWriter writer, MPGLeagueTeams.Teams value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, MpgLeagueTeams.Teams value, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
