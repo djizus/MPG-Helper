@@ -65,15 +65,22 @@ namespace MPGApp
         {
             id = inp.id;
             Name = inp.Name;
-            CurrentSeasonStats = inp.CurrentSeasonStats;
-            PastSeason1Stats = inp.PastSeason1Stats;
-            PastSeason2Stats = inp.PastSeason2Stats;
+            CurrentSeasonStats = inp.CurrentSeasonStats.Clone();
+            if (null != inp.PastSeason1Stats)
+                PastSeason1Stats = inp.PastSeason1Stats.Clone();
+            if (null != inp.PastSeason2Stats)
+                PastSeason2Stats = inp.PastSeason2Stats.Clone();
         }
 
         public PlayersTimeStats(string idIn, string nameIn)
         {
             id = idIn;
             Name = nameIn;
+        }
+
+        internal PlayersTimeStats Clone()
+        {
+            return new PlayersTimeStats(this);
         }
     }
 
@@ -143,43 +150,43 @@ namespace MPGApp
             get { return (OurRating + Math.Min(5, ConsecutivePlay)) * CRate / Rate; }
         }
 
-        //public PlayersWorthStats(PlayersWorthStats inp)
-        //{
-        //    id = inp.id;
-        //    Name = inp.Name;
-        //    Quotation = inp.Quotation;
-        //    Position = inp.Position;
-        //    RealNbMatch = inp.RealNbMatch;
-        //    LastPlayedM = inp.LastPlayedM;
-        //    PStarter = inp.PStarter;
-        //    Rate = inp.Rate;
-        //    Goals = inp.Goals;
-        //    RedC = inp.RedC;
-        //    TotalPlayed = inp.TotalPlayed;
-        //    MinM = inp.MinM;
-        //    MistakeM = inp.MistakeM;
-        //    ShotM = inp.ShotM;
-        //    PShotTargetM = inp.PShotTargetM;
-        //    CrossSucM = inp.CrossSucM;
-        //    PCrossSucM = inp.PCrossSucM;
-        //    PGoalChances = inp.PGoalChances;
-        //    PenaltyNb = inp.PenaltyNb;
-        //    PPenaltyConv = inp.PPenaltyConv;
-        //    AssistsNb = inp.AssistsNb;
-        //    ChancesCreated = inp.ChancesCreated;
-        //    ChancesMiss = inp.ChancesMiss;
-        //    KCleanSheet = inp.KCleanSheet;
-        //    KPSaveShot = inp.KPSaveShot;
-        //    KSaves = inp.KSaves;
-        //    KDeflect = inp.KDeflect;
-        //    KPenaltySave = inp.KPenaltySave;
-        //    ConsecutivePlay = inp.ConsecutivePlay;
-        //    CRate = inp.CRate;
-        //    MinPlayed = inp.MinPlayed;
-        //    CGoals = inp.CGoals;
-        //    CAssists = inp.CAssists;
-        //    CChancesCreated = inp.CChancesCreated;
-        //}
+        public PlayersWorthStats(PlayersWorthStats inp)
+        {
+            id = inp.id;
+            Name = inp.Name;
+            Quotation = inp.Quotation;
+            Position = inp.Position;
+            RealNbMatch = inp.RealNbMatch;
+            LastPlayedM = inp.LastPlayedM;
+            PStarter = inp.PStarter;
+            Rate = inp.Rate;
+            Goals = inp.Goals;
+            RedC = inp.RedC;
+            TotalPlayed = inp.TotalPlayed;
+            MinM = inp.MinM;
+            MistakeM = inp.MistakeM;
+            ShotM = inp.ShotM;
+            PShotTargetM = inp.PShotTargetM;
+            CrossSucM = inp.CrossSucM;
+            PCrossSucM = inp.PCrossSucM;
+            PGoalChances = inp.PGoalChances;
+            PenaltyNb = inp.PenaltyNb;
+            PPenaltyConv = inp.PPenaltyConv;
+            AssistsNb = inp.AssistsNb;
+            ChancesCreated = inp.ChancesCreated;
+            ChancesMiss = inp.ChancesMiss;
+            KCleanSheet = inp.KCleanSheet;
+            KPSaveShot = inp.KPSaveShot;
+            KSaves = inp.KSaves;
+            KDeflect = inp.KDeflect;
+            KPenaltySave = inp.KPenaltySave;
+            ConsecutivePlay = inp.ConsecutivePlay;
+            CRate = inp.CRate;
+            MinPlayed = inp.MinPlayed;
+            CGoals = inp.CGoals;
+            CAssists = inp.CAssists;
+            CChancesCreated = inp.CChancesCreated;
+        }
 
         //public PlayersWorthStats(string id, string name, int quotation, int position, int currentMDay, int lastPlayedM, double pStarter, double rate,
         //    int goals, int redC, int totalPlayed, double minM, double mistakeM, double shotM, double pShotTargetM, double crossSucM, double pCrossSucM,
@@ -229,6 +236,11 @@ namespace MPGApp
             Goals = goals;
             RedC = redC;
             TotalPlayed = totalPlayed;
+        }
+
+        internal PlayersWorthStats Clone()
+        {
+            return new PlayersWorthStats(this);
         }
     }
 }

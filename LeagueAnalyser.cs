@@ -102,11 +102,11 @@ namespace MPGApp
                 set { _teamStrength = value; }
             }
 
-            public LeagueTeam(IOrderedEnumerable<PlayersTimeStats> p, double s, string c, string n)
+            public LeagueTeam(IOrderedEnumerable<PlayersTimeStats> p, string n)
             {
                 _players = p;
-                _teamStrength = s;
-                _bestCompo = c;
+                //_teamStrength = s;
+                //_bestCompo = c;
                 _tName = n;
             }
 
@@ -117,6 +117,54 @@ namespace MPGApp
 
                 return output;
             }
+
+            private void ComputeSrength(string c, PlayersTimeStats k)
+            {
+                int nbDef = int.Parse(c.Substring(0, 1));
+                int nbMid = int.Parse(c.Substring(1, 1));
+                int nbAtt = int.Parse(c.Substring(2, 1));
+
+                var bestDef = _players.Where(x => 2 == x.CurrentSeasonStats.Position).Take(nbDef).Select(x => x.Clone()).ToList();
+                var bestMid = _players.Where(x => 3 == x.CurrentSeasonStats.Position).Take(nbMid);
+                var bestAtt = _players.Where(x => 4 == x.CurrentSeasonStats.Position).Take(nbAtt);
+
+                if (5 == nbDef)
+                {
+                    //bestDef = bestDef.Select(x => x.Clone());
+                    bestDef.ForEach(x => x.CurrentSeasonStats.Rate += 0.5);//bonus 1 with 5 defenders
+                }
+                else if (4 == nbDef)
+                {
+                    //bestDef = bestDef.Select(x => x.Clone());
+                    bestDef.ToList().ForEach(x => x.CurrentSeasonStats.Rate += 0.25);//bonus 0.5 with 4 defenders
+                }
+
+                var tStrength = k.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
+                var nbGoals = k.CurrentSeasonStats.Goals + bestDef.Sum(x => x.CurrentSeasonStats.Goals) + bestMid.Sum(x => x.CurrentSeasonStats.Goals) + bestAtt.Sum(x => x.CurrentSeasonStats.Goals);
+
+                var teamEval = (tStrength + 2 * nbGoals);
+
+                if (teamEval > _teamStrength)
+                {
+                    _teamStrength = teamEval;
+                    _bestCompo = c;
+                }
+            }
+
+            public void ComputeBestTeam()
+            {
+                var bestKee = _players.Where(x => 1 == x.CurrentSeasonStats.Position).First();
+
+                ComputeSrength("541", bestKee);
+                ComputeSrength("532", bestKee);
+
+                ComputeSrength("451", bestKee);
+                ComputeSrength("442", bestKee);
+                ComputeSrength("433", bestKee);
+
+                ComputeSrength("352", bestKee);
+                ComputeSrength("343", bestKee);
+            }
         }
 
         private void AnalyzeLeagueTeams()
@@ -124,8 +172,7 @@ namespace MPGApp
             foreach (var t in _allTeams.teams.mpg_teams)
             {
                 var playerList = new List<PlayersTimeStats>();
-                double bestTeamStrength = 0;
-                string bestTeamCompo = "";
+
                 foreach (var p in t.players)
                 {
                     var pStats = _allPlayers.FindById(p.id);
@@ -140,86 +187,13 @@ namespace MPGApp
 
                 var oPlayerList = playerList.OrderByDescending(x => x.CurrentRating);
 
-                var bestKee = oPlayerList.Where(x => 1 == x.CurrentSeasonStats.Position).First();
-                var bestDef = oPlayerList.Where(x => 2 == x.CurrentSeasonStats.Position).Take(4);
-                var bestMid = oPlayerList.Where(x => 3 == x.CurrentSeasonStats.Position).Take(3);
-                var bestAtt = oPlayerList.Where(x => 4 == x.CurrentSeasonStats.Position).Take(3);
-                var tStrength = bestKee.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
+                var currentTeam = new LeagueTeam(oPlayerList, t.name);
+                currentTeam.ComputeBestTeam();
 
-                if (tStrength > bestTeamStrength)
-                {
-                    bestTeamStrength = tStrength;
-                    bestTeamCompo = "433";
-                }
-
-                bestDef = oPlayerList.Where(x => 2 == x.CurrentSeasonStats.Position).Take(5);
-                bestMid = oPlayerList.Where(x => 3 == x.CurrentSeasonStats.Position).Take(3);
-                bestAtt = oPlayerList.Where(x => 4 == x.CurrentSeasonStats.Position).Take(2);
-                tStrength = bestKee.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
-
-                if (tStrength > bestTeamStrength)
-                {
-                    bestTeamStrength = tStrength;
-                    bestTeamCompo = "532";
-                }
-
-                bestDef = oPlayerList.Where(x => 2 == x.CurrentSeasonStats.Position).Take(5);
-                bestMid = oPlayerList.Where(x => 3 == x.CurrentSeasonStats.Position).Take(4);
-                bestAtt = oPlayerList.Where(x => 4 == x.CurrentSeasonStats.Position).Take(1);
-                tStrength = bestKee.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
-
-                if (tStrength > bestTeamStrength)
-                {
-                    bestTeamStrength = tStrength;
-                    bestTeamCompo = "541";
-                }
-
-                bestDef = oPlayerList.Where(x => 2 == x.CurrentSeasonStats.Position).Take(4);
-                bestMid = oPlayerList.Where(x => 3 == x.CurrentSeasonStats.Position).Take(5);
-                bestAtt = oPlayerList.Where(x => 4 == x.CurrentSeasonStats.Position).Take(1);
-                tStrength = bestKee.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
-
-                if (tStrength > bestTeamStrength)
-                {
-                    bestTeamStrength = tStrength;
-                    bestTeamCompo = "451";
-                }
-
-                bestDef = oPlayerList.Where(x => 2 == x.CurrentSeasonStats.Position).Take(4);
-                bestMid = oPlayerList.Where(x => 3 == x.CurrentSeasonStats.Position).Take(4);
-                bestAtt = oPlayerList.Where(x => 4 == x.CurrentSeasonStats.Position).Take(2);
-                tStrength = bestKee.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
-
-                if (tStrength > bestTeamStrength)
-                {
-                    bestTeamStrength = tStrength;
-                    bestTeamCompo = "442";
-                }
-
-                bestDef = oPlayerList.Where(x => 2 == x.CurrentSeasonStats.Position).Take(3);
-                bestMid = oPlayerList.Where(x => 3 == x.CurrentSeasonStats.Position).Take(5);
-                bestAtt = oPlayerList.Where(x => 4 == x.CurrentSeasonStats.Position).Take(2);
-                tStrength = bestKee.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
-
-                if (tStrength > bestTeamStrength)
-                {
-                    bestTeamStrength = tStrength;
-                    bestTeamCompo = "352";
-                }
-
-                bestDef = oPlayerList.Where(x => 2 == x.CurrentSeasonStats.Position).Take(3);
-                bestMid = oPlayerList.Where(x => 3 == x.CurrentSeasonStats.Position).Take(4);
-                bestAtt = oPlayerList.Where(x => 4 == x.CurrentSeasonStats.Position).Take(3);
-                tStrength = bestKee.CurrentRating + bestDef.Sum(x => x.CurrentRating) + bestMid.Sum(x => x.CurrentRating) + bestAtt.Sum(x => x.CurrentRating);
-
-                if (tStrength > bestTeamStrength)
-                {
-                    bestTeamStrength = tStrength;
-                    bestTeamCompo = "343";
-                }
-
-                _lTeams.Add(new LeagueTeam(oPlayerList, bestTeamStrength, bestTeamCompo, t.name));
+                _lTeams.Add(currentTeam);
             }
+
+
         }
 
         public void GetLeaguePlayerData()
