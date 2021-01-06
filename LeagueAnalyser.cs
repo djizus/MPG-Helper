@@ -10,8 +10,8 @@ namespace MPGApp
     public class LeagueAnalyser
     {
         private const string jnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1wZ191c2VyXzU0MzQ2MSIsImNoZWNrIjoiNmY5NDdiYWY3MmY2ZDE3YyIsImlhdCI6MTYwNDc1MjIyOH0.JZIMpUpwo37eQWY2NCm70vrCUndPb9hcIoU8sryqGh4";
-        private LiteDatabase Db { get; set; }
-        private HttpClient Client { get; set; }
+        private LiteDatabase _dB { get; set; }
+        private HttpClient _client { get; set; }
         public ChampData Championship { get; set; }
         public string LeagueCode { get; set; }
 
@@ -24,9 +24,10 @@ namespace MPGApp
 
         public LeagueAnalyser(LiteDatabase commonDb, HttpClient commonClient, string leagueCode)
         {
-            Db = commonDb;
-            Client = commonClient;
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(jnToken);
+            _dB = commonDb;
+            _client = commonClient;
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(jnToken);
+            _client.DefaultRequestHeaders.Add("client-version", "6.9.1");
             LeagueCode = leagueCode;
 
             _lTeams = new List<LeagueTeam>();
@@ -37,21 +38,41 @@ namespace MPGApp
         public void InitializeLeagueData()
         {
             var vUrl = string.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/status");
-            var response = Client.GetStringAsync(vUrl).Result;
+            var response = _client.GetStringAsync(vUrl).Result;
             _leagueStatus = System.Text.Json.JsonSerializer.Deserialize<MpgLeagueStatus>(response);
 
-            vUrl = string.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/teams");
-            response = Client.GetStringAsync(vUrl).Result;
-            _allTeams = System.Text.Json.JsonSerializer.Deserialize<MpgLeagueTeams>(response);
-
-            if (_leagueStatus.mode > 1 && _leagueStatus.userInLeague)
+            if (_leagueStatus.leagueStatus == 3)
             {
-                vUrl = string.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/transfer/buy");
-                response = Client.GetStringAsync(vUrl).Result;
-                _leagueMercato = System.Text.Json.JsonSerializer.Deserialize<MpgMercato>(response);
+                try
+                {
+                    vUrl = string.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/mercato");
+                    response = _client.GetStringAsync(vUrl).Result;
+                    _leagueMercato = System.Text.Json.JsonSerializer.Deserialize<MpgMercato>(response);
+                }
+                catch
+                {
+                    vUrl = string.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/pending_mercato");
+                    response = _client.GetStringAsync(vUrl).Result;
+                    _leagueMercato = System.Text.Json.JsonSerializer.Deserialize<MpgMercato>(response);
+                }
+
+            }
+            else
+            {
+                vUrl = string.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/teams");
+                response = _client.GetStringAsync(vUrl).Result;
+                _allTeams = System.Text.Json.JsonSerializer.Deserialize<MpgLeagueTeams>(response);
+
+                if (_leagueStatus.mode > 1 && _leagueStatus.userInLeague)
+                {
+                    vUrl = string.Concat("https://api.monpetitgazon.com/league/", LeagueCode, "/transfer/buy");
+                    response = _client.GetStringAsync(vUrl).Result;
+                    _leagueMercato = System.Text.Json.JsonSerializer.Deserialize<MpgMercato>(response);
+                }
+
             }
 
-            _allPlayers = Db.GetCollection<PlayersTimeStats>(string.Concat(Championship.champName, "PlayersCalcStats"));
+            _allPlayers = _dB.GetCollection<PlayersTimeStats>(string.Concat(Championship.champName, "PlayersCalcStats"));
         }
 
         public void AnalyzeMercato()
@@ -79,9 +100,12 @@ namespace MPGApp
 
             _userAvailablePlayers = auPlayers.OrderByDescending(x => x.CurrentRating);
 
-            var auBd = Db.GetCollection<AuPlayers>(string.Concat(LeagueCode, "MercatoPlayers"));
-            auBd.DeleteAll();
-            auBd.InsertBulk(_userAvailablePlayers);
+            if (_userAvailablePlayers.Count() > 0)
+            {
+                var auBd = _dB.GetCollection<AuPlayers>(string.Concat(LeagueCode, "MercatoPlayers"));
+                auBd.DeleteAll();
+                auBd.InsertBulk(_userAvailablePlayers);
+            }
 
             //var oK = UserAvailablePlayers.Where(x => (1 == x.Position));
             //var oD = UserAvailablePlayers.Where(x => (2 == x.Position));
@@ -95,11 +119,23 @@ namespace MPGApp
             private double _teamStrength;
             private string _bestCompo;
             private string _tName;
+            private bool _isUserTeam;
+
+            public IOrderedEnumerable<PlayersTimeStats> Players
+            {
+                get { return _players; }
+            }
 
             public double TeamStrength
             {
                 get { return _teamStrength; }
                 set { _teamStrength = value; }
+            }
+
+            public bool IsUserTeam
+            {
+                get { return _isUserTeam; }
+                set { _isUserTeam = value; }
             }
 
             public LeagueTeam(IOrderedEnumerable<PlayersTimeStats> p, string n)
@@ -108,6 +144,7 @@ namespace MPGApp
                 //_teamStrength = s;
                 //_bestCompo = c;
                 _tName = n;
+                _isUserTeam = false;
             }
 
             public string GetConsoleDisplay()
@@ -190,10 +227,11 @@ namespace MPGApp
                 var currentTeam = new LeagueTeam(oPlayerList, t.name);
                 currentTeam.ComputeBestTeam();
 
+                if (t.id == _allTeams.current_mpg_team)
+                    currentTeam.IsUserTeam = true;
+
                 _lTeams.Add(currentTeam);
             }
-
-
         }
 
         public void GetLeaguePlayerData()
@@ -203,7 +241,27 @@ namespace MPGApp
             if (null != _leagueMercato)
                 AnalyzeMercato();
 
-            AnalyzeLeagueTeams();
+            if (4 == _leagueStatus.leagueStatus)
+                AnalyzeLeagueTeams();
+
+            var tst = _lTeams.Where(x => true == x.IsUserTeam).First();
+
+            var matchDays = _dB.GetCollection<MpgCalendar>(string.Concat(Championship.ToString(), "Calendar")).FindAll();
+            var tst2 = matchDays.Where(x => x.matches.First().quotationPreGame != null).First();
+
+            var tst3 = _dB.GetCollection<MpgChampionshipPlayers>(string.Concat(Championship.champName, "Players")).FindAll();
+
+            foreach (var p in tst.Players)
+            {
+                var t = tst3.Where(x => x.id == p.id).First().teamId.ToString();
+                foreach(var m in tst2.matches)
+                {
+                    if(m.away.id == t || m.home.id == t)
+                    {
+                       var  matchId = m.id;
+                    }
+                }
+            }
 
             WriteConsoleOutput();
         }

@@ -63,6 +63,7 @@ namespace MPGApp
 
         public PlayersTimeStats(PlayersTimeStats inp)
         {
+            //OnlyUsed in Clone
             id = inp.id;
             Name = inp.Name;
             CurrentSeasonStats = inp.CurrentSeasonStats.Clone();

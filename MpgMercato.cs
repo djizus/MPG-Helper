@@ -48,5 +48,11 @@ namespace MPGApp
         public string currentTeam { get; set; }
         public List<Availableplayer> availablePlayers { get; set; }
         public List<Userplayer> userPlayers { get; set; }
+
+        public MpgMercato()
+        {
+            availablePlayers = new List<Availableplayer>();
+            userPlayers = new List<Userplayer>();
+        }
     }
 }
