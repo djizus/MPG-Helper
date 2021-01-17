@@ -61,6 +61,13 @@ namespace MPGApp
             get { return CurrentSeasonStats.OurRating - OurRating; }
         }
 
+        public double QuotationPreGame { get; set; }
+
+        public double NextGameRating
+        {
+            get { return CurrentSeasonStats.OurRating / QuotationPreGame; }
+        }
+
         public PlayersTimeStats(PlayersTimeStats inp)
         {
             //OnlyUsed in Clone

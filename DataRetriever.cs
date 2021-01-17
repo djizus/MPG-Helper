@@ -70,8 +70,7 @@ namespace MPGApp
             }
             else
             {
-                //
-                if (currentMatchDay.matches.Last().date < DateTime.Now)
+                if (currentMatchDay.matches.First().date > DateTime.Now)
                 {
                     var firstPlayer = dData.Query().Limit(1).First();
                     if (currentMatchDay.day > firstPlayer.nbMatch)
@@ -142,10 +141,25 @@ namespace MPGApp
         {
             var calendarData = _dB.GetCollection<MpgCalendar>(string.Concat(Championship.ToString(), "Calendar"));
 
-            if(currentMatchDay.matches.Last().definitiveRating || currentMatchDay.matches.First().quotationPreGame != null)
+            bool updateCalendar = false;
+            if(calendarData.Count() != 0)
             {
-                calendarData.DeleteAll();
+                var tst2 = calendarData.FindAll().Where(x => x.matches.First().quotationPreGame != null).First();
+                if(currentMatchDay.matches.Last().definitiveRating && (tst2.day != currentMatchDay.day + 1))
+                {
+                    updateCalendar = true;
+                    calendarData.DeleteAll();
+                }
+                else if((currentMatchDay.matches.First().quotationPreGame != null) && (tst2.day != currentMatchDay.day))
+                {
+                    updateCalendar = true;
+                    calendarData.DeleteAll();
+                }
 
+            }
+
+            if (0 == calendarData.Count() || updateCalendar)
+            {
                 Console.WriteLine("Get " + Championship.champName + " Calendar ... Start");
                 var vUrl = string.Concat("https://api.monpetitgazon.com/championship/", Championship.champNb, "/calendar");
 

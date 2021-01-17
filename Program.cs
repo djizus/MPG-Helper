@@ -12,15 +12,15 @@ namespace MPGApp
         static void Main(string[] args)
         {
             var championship = new ChampData();
-            //DoChamp(championship);
+            DoChamp(championship);
 
-            //var lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9T8") { Championship = championship };
-            //lAnalyser.GetLeaguePlayerData();
+            var lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9T8") { Championship = championship };
+            lAnalyser.GetLeaguePlayerData();
 
             //lAnalyser = new LeagueAnalyser(Db, client, "MLNHJ9UC") { Championship = championship };
             //lAnalyser.GetLeaguePlayerData();
 
-            //Db.Dispose();
+            Db.Dispose();
 
             //championship.champName = "EPL";
             //championship.champNb = 2;
@@ -35,19 +35,19 @@ namespace MPGApp
             championship.champNb = 4;
             DoChamp(championship);
 
-            var lAnalyser = new LeagueAnalyser(Db, client, "M3NUG9U4") { Championship = championship };
+            lAnalyser = new LeagueAnalyser(Db, client, "M3NUG9U4") { Championship = championship };
+            lAnalyser.GetLeaguePlayerData();
+
+            //Db.Dispose();
+
+            championship.champName = "Calcio";
+            championship.champNb = 5;
+            DoChamp(championship);
+
+            lAnalyser = new LeagueAnalyser(Db, client, "M4HF5RS3") { Championship = championship };
             lAnalyser.GetLeaguePlayerData();
 
             Db.Dispose();
-
-            //championship.champName = "Calcio";
-            //championship.champNb = 5;
-            //DoChamp(championship);
-
-            //lAnalyser = new LeagueAnalyser(Db, client, "M4HF5RS3") { Championship = championship };
-            //lAnalyser.GetLeaguePlayerData();
-
-            //Db.Dispose();
         }
 
         static void DoChamp(ChampData champ)

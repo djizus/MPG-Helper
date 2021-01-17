@@ -138,6 +138,11 @@ namespace MPGApp
                 set { _isUserTeam = value; }
             }
 
+            public string BestCompo
+            {
+                get { return _bestCompo; }
+            }
+
             public LeagueTeam(IOrderedEnumerable<PlayersTimeStats> p, string n)
             {
                 _players = p;
@@ -251,16 +256,30 @@ namespace MPGApp
 
             var tst3 = _dB.GetCollection<MpgChampionshipPlayers>(string.Concat(Championship.champName, "Players")).FindAll();
 
+            var teamQuotes = new Dictionary<string, double>();
+
             foreach (var p in tst.Players)
             {
                 var t = tst3.Where(x => x.id == p.id).First().teamId.ToString();
-                foreach(var m in tst2.matches)
+
+                if (!teamQuotes.ContainsKey(t))
                 {
-                    if(m.away.id == t || m.home.id == t)
+                    foreach (var m in tst2.matches)
                     {
-                       var  matchId = m.id;
+                        if (m.away.id == t)
+                        {
+                            teamQuotes.Add(t, m.quotationPreGame.Away);
+                            break;
+                        }
+                        else if (m.home.id == t)
+                        {
+                            teamQuotes.Add(t, m.quotationPreGame.Home);
+                            break;
+                        }
                     }
                 }
+
+                p.QuotationPreGame = teamQuotes[t];
             }
 
             WriteConsoleOutput();
@@ -280,6 +299,47 @@ namespace MPGApp
             foreach (var t in oTeams)
             {
                 Console.WriteLine(t.GetConsoleDisplay());
+            }
+
+            var ut = oTeams.Where(x => x.IsUserTeam).First();
+            var players = ut.Players.OrderByDescending(x => x.NextGameRating);
+
+            Console.WriteLine("");
+            header = string.Format("{0,-25}{1,10}{2,10}\n", "Keeper", "Rating", "Quote");
+            Console.WriteLine(header);
+
+            var k = players.Where(x => x.CurrentSeasonStats.Position == 1).First();
+            var output = string.Format("{0,-25}{1,10:F2}{2,10:F2}", k.Name, k.CurrentRating, k.QuotationPreGame);
+            Console.WriteLine(output);
+
+            Console.WriteLine("");
+            header = string.Format("{0,-25}{1,10}{2,10}\n", "Defenders", "Rating", "Quote");
+            Console.WriteLine(header);
+            var ptd = players.Where(x => x.CurrentSeasonStats.Position == 2).Take(int.Parse(ut.BestCompo.Substring(0, 1)) + 2);
+            foreach (var p in ptd)
+            {
+                output = string.Format("{0,-25}{1,10:F2}{2,10:F2}", p.Name, p.CurrentRating, p.QuotationPreGame);
+                Console.WriteLine(output);
+            }
+
+            Console.WriteLine("");
+            header = string.Format("{0,-25}{1,10}{2,10}\n", "Midfielders", "Rating", "Quote");
+            ptd = players.Where(x => x.CurrentSeasonStats.Position == 3).Take(int.Parse(ut.BestCompo.Substring(1, 1)) + 2);
+            Console.WriteLine(header);
+            foreach (var p in ptd)
+            {
+                output = string.Format("{0,-25}{1,10:F2}{2,10:F2}", p.Name, p.CurrentRating, p.QuotationPreGame);
+                Console.WriteLine(output);
+            }
+
+            Console.WriteLine("");
+            header = string.Format("{0,-25}{1,10}{2,10}\n", "Attackers", "Rating", "Quote");
+            ptd = players.Where(x => x.CurrentSeasonStats.Position == 4).Take(int.Parse(ut.BestCompo.Substring(2, 1)) + 2);
+            Console.WriteLine(header);
+            foreach (var p in ptd)
+            {
+                output = string.Format("{0,-25}{1,10:F2}{2,10:F2}", p.Name, p.CurrentRating, p.QuotationPreGame);
+                Console.WriteLine(output);
             }
         }
     }
