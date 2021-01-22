@@ -10,6 +10,7 @@ namespace MPGApp
     public class LeagueAnalyser
     {
         private const string jnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1wZ191c2VyXzU0MzQ2MSIsImNoZWNrIjoiNmY5NDdiYWY3MmY2ZDE3YyIsImlhdCI6MTYwNDc1MjIyOH0.JZIMpUpwo37eQWY2NCm70vrCUndPb9hcIoU8sryqGh4";
+        private const string botToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1wZ191c2VyXzI0NDcwNDUiLCJjaGVjayI6IjJkMWY4NWM5OTkyNmMwMTgiLCJpYXQiOjE2MTEwODM3NDB9.PopNzbRXwy9nwm4dysAtu6cVaKXi_85_Zis0uMsZC_4";
         private LiteDatabase _dB { get; set; }
         private HttpClient _client { get; set; }
         public ChampData Championship { get; set; }
@@ -26,7 +27,7 @@ namespace MPGApp
         {
             _dB = commonDb;
             _client = commonClient;
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(jnToken);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(botToken);
             _client.DefaultRequestHeaders.Add("client-version", "6.9.1");
             LeagueCode = leagueCode;
 
@@ -249,37 +250,48 @@ namespace MPGApp
             if (4 == _leagueStatus.leagueStatus)
                 AnalyzeLeagueTeams();
 
-            var tst = _lTeams.Where(x => true == x.IsUserTeam).First();
+            var userTeam = _lTeams.Where(x => true == x.IsUserTeam).First();
 
             var matchDays = _dB.GetCollection<MpgCalendar>(string.Concat(Championship.ToString(), "Calendar")).FindAll();
-            var tst2 = matchDays.Where(x => x.matches.First().quotationPreGame != null).First();
-
-            var tst3 = _dB.GetCollection<MpgChampionshipPlayers>(string.Concat(Championship.champName, "Players")).FindAll();
-
-            var teamQuotes = new Dictionary<string, double>();
-
-            foreach (var p in tst.Players)
+            var matchQuotes = matchDays.Where(x => x.matches.First().quotationPreGame != null);
+            
+            if(matchQuotes.Any())
             {
-                var t = tst3.Where(x => x.id == p.id).First().teamId.ToString();
+                var currentMatchQuote = matchQuotes.First();
+                var playersList = _dB.GetCollection<MpgChampionshipPlayers>(string.Concat(Championship.champName, "Players")).FindAll();
 
-                if (!teamQuotes.ContainsKey(t))
+                var teamQuotes = new Dictionary<string, double>();
+
+                foreach (var p in userTeam.Players)
                 {
-                    foreach (var m in tst2.matches)
+                    var t = playersList.Where(x => x.id == p.id).First().teamId.ToString();
+
+                    if (!teamQuotes.ContainsKey(t))
                     {
-                        if (m.away.id == t)
+                        foreach (var m in currentMatchQuote.matches)
                         {
-                            teamQuotes.Add(t, m.quotationPreGame.Away);
-                            break;
-                        }
-                        else if (m.home.id == t)
-                        {
-                            teamQuotes.Add(t, m.quotationPreGame.Home);
-                            break;
+                            if (m.away.id == t)
+                            {
+                                teamQuotes.Add(t, m.quotationPreGame.Away);
+                                break;
+                            }
+                            else if (m.home.id == t)
+                            {
+                                teamQuotes.Add(t, m.quotationPreGame.Home);
+                                break;
+                            }
                         }
                     }
-                }
 
-                p.QuotationPreGame = teamQuotes[t];
+                    p.QuotationPreGame = teamQuotes[t];
+                }
+            }
+            else
+            {
+                foreach (var p in userTeam.Players)
+                {
+                    p.QuotationPreGame = 1;
+                }
             }
 
             WriteConsoleOutput();
