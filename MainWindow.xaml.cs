@@ -463,7 +463,7 @@ namespace MPG_WPF_App
                     lb_infoLigue1.Content = "Championnat : " + varCham;
                     lb_infoLigue2.Content = "Mode : " + varMode;
                     lb_infoLigue4.Content = "Ligue de " + mpgLeagueElements[0].League.Players + " joueurs";
-                    if (varMode == "Normal" && mpgLeagueElements[0].LeagueStatus != 3)
+                    if (varMode == "Normal" && mpgLeagueElements[0].Status != 3)
                     {
                         dg_mercato.Visibility = Visibility.Hidden;
                         lb_Mercato.Content = "Mercato fermé dans cette ligue, pas de bol !";
